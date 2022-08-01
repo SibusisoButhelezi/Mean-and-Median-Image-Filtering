@@ -7,22 +7,22 @@ import java.io.IOException;
 public class MeanFilterSerial{
 
 	public static void main(String[] args){
-		
-		int width = 474;
-		int height = 316;
 
 		BufferedImage img = null;
-		img = Utilities.readInImage(img, width, height);
-		// try{			
-		// 	file = new File("/home/sibusiso/Desktop/CSC2002S/Assignment 1/CSC2002S_Assignment_1/src/Puppy.jpeg");
-		// 	img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-		// 	img = ImageIO.read(file);
-		// 	System.out.println("File read.");
-		// }
-		// catch(IOException e){
-		// 	System.out.println("Error reading: " + e);
-		// }
+		img = Utilities.readInImage(img);
 		Utilities.writeImage(img);
+
+		int[] test1 = {5,2,21,50};
+		int[] test2 = {6,4,43,100};
+		int[] test3 = {7,6,65,150};
+		int[] test4 = {8,8,87,200};
+		int[] test5 = {9,10,109,250};
+
+		int[] test = Utilities.avgPixelValues(test1, test2, test3, test4, test5);
+		for (int x : test)
+			System.out.print(" " + x);
+
+
 	}
 
 	
