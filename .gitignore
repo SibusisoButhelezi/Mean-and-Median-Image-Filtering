@@ -1,2 +1,5 @@
 # Ignore all .odt files
 *.odt
+
+# Ignore all class files
+*.class
