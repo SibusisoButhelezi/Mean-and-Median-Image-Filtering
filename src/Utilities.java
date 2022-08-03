@@ -5,26 +5,28 @@ import java.io.IOException;
 import java.util.Arrays;
 
 public class Utilities{
-	public static BufferedImage readImage(BufferedImage img){
+	public static BufferedImage readImage(BufferedImage img, String imageName){
 		try{
-			img = ImageIO.read(new File("/home/sibusiso/Desktop/CSC2002S/Assignment 1/CSC2002S_Assignment_1/src/Puppy.jpeg"));
+
+			img = ImageIO.read(new File("/home/sibusiso/Desktop/CSC2002S/Assignment 1/CSC2002S_Assignment_1/src/" + imageName));
+			int width = img.getWidth();
+			int height = img.getHeight();
+			img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+			img = ImageIO.read(new File("/home/sibusiso/Desktop/CSC2002S/Assignment 1/CSC2002S_Assignment_1/src/" + imageName));
+			System.out.println("Image read.");
+
+			return img;
 		}
 		catch(IOException e){
 			System.out.println("Error reading: " + e);
-			return null;
 		}
-
-		int width = img.getWidth();
-		int height = img.getHeight();
-
-		return new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		return null;
 	}
 
-	public static void writeImage(BufferedImage img){
-		try{
-			ImageIO.write(img, "jpeg", new File("/home/sibusiso/Desktop/CSC2002S/Assignment 1/CSC2002S_Assignment_1/src/PuppyOut.jpeg"));
+	public static void writeImage(BufferedImage img, String imageName){
+		try{ 
+			ImageIO.write(img, "jpg", new File("/home/sibusiso/Desktop/CSC2002S/Assignment 1/CSC2002S_Assignment_1/src/" + imageName));
 			System.out.println("Image written");
-			//home/sibusiso/Desktop/CSC2002S/Assignment 1/CSC2002S_Assignment_1/src
 		}
 		catch(IOException e){
 			System.out.println("Error writing: " + e);

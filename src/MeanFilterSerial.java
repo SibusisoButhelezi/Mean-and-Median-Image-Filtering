@@ -8,52 +8,60 @@ public class MeanFilterSerial{
 
 	public static void main(String[] args){
 
-		int dimension = 9;
-		BufferedImage img = null;//, newImg = null;
-		img = Utilities.readImage(img);
-		//newImg = Utilities.readImage(img);
+		String imageName = args[0];
+		String outputName = args[1];
+		int dimension = Integer.parseInt(args[2]);
 
-		// int[] borders = Utilities.getBorders(img, dimension);
+		if (dimension % 2 == 0){
+			System.out.println("Invalid window width.");
+			System.exit(0);
+		}
 
-		// int radius = dimension/2;
+		BufferedImage img = null, newImg = null;
+		img = Utilities.readImage(img, imageName);
+		newImg = Utilities.readImage(newImg, imageName);
 
-		// int topBorder = borders[0];
-		// int rightBorder = borders[1];
-		// int bottomBorder = borders[2];
-		// int leftBorder = borders[3];
+		int[] borders = Utilities.getBorders(img, dimension);
 
-		// int[][] pixels = new int[dimension*dimension][];
-		// int index = 0;
-		// for (int y = topBorder; y <= bottomBorder; y++){
-		// 	for(int x = rightBorder; x <= leftBorder; x++){
-		// 		for (int j = y - radius; j <= y + radius; j++){
-		// 			for (int i = x - radius; i <= x + radius; i++){
-		// 				int p = img.getRGB(j,i);
-		// 				int[] pixelValues = Utilities.pixelValues(p);
-		// 				pixels[index++] = pixelValues;
-		// 			}
-		// 		}
-		// 		int[] avgPixelValues = Utilities.avgPixelValues(pixels);
-		// 		int p = Utilities.setPixelValues(avgPixelValues);
-		// 		img.setRGB(y, x, p);//newImg.setRGB(y, x, p);
-		// 		index = 0;
-		// 	}
-		// }
+		int radius = dimension/2;
 
-		// System.out.println("Done");
+		int topBorder = borders[0];
+		int rightBorder = borders[1];
+		int bottomBorder = borders[2];
+		int leftBorder = borders[3];
 
-		// // int[] test1 = {5,2,21,50};
-		// // int[] test2 = {6,4,43,100};
-		// // int[] test3 = {7,6,65,150};
-		// // int[] test4 = {8,8,87,200};
-		// // int[] test5 = {9,10,109,250};
+		int[][] pixels = new int[dimension*dimension][];
+		int index = 0;
 
-		// // int[] test = Utilities.medPixelValues(test1, test2, test3, test4);
-		// // for (int x : test)
-		// // 	System.out.print(" " + x);
+		for (int y = topBorder; y < bottomBorder; y++){
+			for(int x = leftBorder; x < rightBorder; x++){
+				for (int j = y - radius; j <= y + radius; j++){
+					for (int i = x - radius; i <= x + radius; i++){
+						int p = img.getRGB(i,j);
+						int[] pixelValues = Utilities.pixelValues(p);
+						pixels[index++] = pixelValues;
+					}
+				}
+				int[] avgPixelValues = Utilities.avgPixelValues(pixels);
+				int p = Utilities.setPixelValues(avgPixelValues);
+				newImg.setRGB(x, y, p);
+				index = 0;
+			}
+		}
 
-		// //Utilities.writeImage(newImg);
-		Utilities.writeImage(img);
+		System.out.println("Done Processing.");
+
+		// int[] test1 = {5,2,21,50};
+		// int[] test2 = {6,4,43,100};
+		// int[] test3 = {7,6,65,150};
+		// int[] test4 = {8,8,87,200};
+		// int[] test5 = {9,10,109,250};
+
+		// int[] test = Utilities.medPixelValues(test1, test2, test3, test4);
+		// for (int x : test)
+		// 	System.out.print(" " + x);
+
+		Utilities.writeImage(newImg, outputName);
 
 	}
 
