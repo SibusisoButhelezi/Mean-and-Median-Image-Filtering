@@ -2,12 +2,12 @@ import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 public class Utilities{
-	public static BufferedImage readInImage(BufferedImage img){
+	public static BufferedImage readImage(BufferedImage img){
 		try{
 			img = ImageIO.read(new File("/home/sibusiso/Desktop/CSC2002S/Assignment 1/CSC2002S_Assignment_1/src/Puppy.jpeg"));
-			System.out.println("File read.");
 		}
 		catch(IOException e){
 			System.out.println("Error reading: " + e);
@@ -23,7 +23,8 @@ public class Utilities{
 	public static void writeImage(BufferedImage img){
 		try{
 			ImageIO.write(img, "jpeg", new File("/home/sibusiso/Desktop/CSC2002S/Assignment 1/CSC2002S_Assignment_1/src/PuppyOut.jpeg"));
-			System.out.println("File written");
+			System.out.println("Image written");
+			//home/sibusiso/Desktop/CSC2002S/Assignment 1/CSC2002S_Assignment_1/src
 		}
 		catch(IOException e){
 			System.out.println("Error writing: " + e);
@@ -69,9 +70,49 @@ public class Utilities{
 
 		// get averages of each ARGB values.
 		for (int i = 0; i < valuesAvg.length; i++)
-				valuesAvg[i] = valuesAvg[i]/Values.length;
+			valuesAvg[i] = valuesAvg[i]/Values.length;
 
 		return valuesAvg;
 
+	}
+
+	public static int[] medPixelValues(int[]... Values){
+		int[] valuesMed = new int[4];
+
+		int[] Avalues = new int[Values.length];
+		int[] Rvalues = new int[Values.length];
+		int[] Gvalues = new int[Values.length];
+		int[] Bvalues = new int[Values.length];
+		int ind = 0;
+
+		for (int[] pixel : Values){
+			Avalues[ind] = pixel[0];
+			Rvalues[ind] = pixel[1];
+			Gvalues[ind] = pixel[2];
+			Bvalues[ind++] = pixel[3];
+		}
+		
+		valuesMed[0] = getMedian(Avalues);
+		valuesMed[1] = getMedian(Rvalues);
+		valuesMed[2] = getMedian(Gvalues);
+		valuesMed[3] = getMedian(Bvalues);	
+
+		return valuesMed;		
+	}
+
+	public static int getMedian(int[] array){
+		Arrays.sort(array);
+		if (array.length % 2 == 1)
+			return array[array.length/2];
+		return (array[array.length/2] + array[(array.length/2) - 1])/2;
+	}
+
+	public static int[] getBorders(BufferedImage img, int dimension){
+		int[] borders = new int[4];
+		borders[0] = dimension/2; //top
+		borders[1] = img.getWidth() - dimension/2; //right
+		borders[2] = img.getHeight() - dimension/2; //bottom
+		borders[3] = dimension/2; //left
+		return borders;
 	}
 }
