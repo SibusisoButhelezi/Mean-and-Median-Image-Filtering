@@ -1,8 +1,5 @@
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
-import java.io.File;
-import java.io.IOException;
-
 
 public class MeanFilterSerial{
 
@@ -35,6 +32,7 @@ public class MeanFilterSerial{
 
 		for (int y = topBorder; y < bottomBorder; y++){
 			for(int x = leftBorder; x < rightBorder; x++){
+
 				for (int j = y - radius; j <= y + radius; j++){
 					for (int i = x - radius; i <= x + radius; i++){
 						int p = img.getRGB(i,j);
@@ -42,6 +40,7 @@ public class MeanFilterSerial{
 						pixels[index++] = pixelValues;
 					}
 				}
+				
 				int[] avgPixelValues = Utilities.avgPixelValues(pixels);
 				int p = Utilities.setPixelValues(avgPixelValues);
 				newImg.setRGB(x, y, p);

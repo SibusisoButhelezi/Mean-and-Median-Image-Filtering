@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.util.Arrays;
 
 public class Utilities{
+
 	public static BufferedImage readImage(BufferedImage img, String imageName){
+
 		try{
 
 			img = ImageIO.read(new File("/home/sibusiso/Desktop/CSC2002S/Assignment 1/CSC2002S_Assignment_1/src/" + imageName));
@@ -24,6 +26,7 @@ public class Utilities{
 	}
 
 	public static void writeImage(BufferedImage img, String imageName){
+		
 		try{ 
 			ImageIO.write(img, "jpg", new File("/home/sibusiso/Desktop/CSC2002S/Assignment 1/CSC2002S_Assignment_1/src/" + imageName));
 			System.out.println("Image written");
