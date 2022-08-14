@@ -9,7 +9,7 @@ import java.util.concurrent.RecursiveTask;
 
 public class MeanFilterParallel extends RecursiveAction{
 
-	protected int Threshold = 50;
+	protected int Threshold = 120;
 	protected static BufferedImage img = null, newImg = null;
 	protected int dimension, start, right, end, left, radius;
 
@@ -25,11 +25,15 @@ public class MeanFilterParallel extends RecursiveAction{
 	}
 
 	protected void compute(){
+		// Check if the height of the image satisfies the threshold, if it does, filter the area of the image
 		if (end - start <= Threshold){
 			newImg = filter();
 			return;
 		}
-		int newBottom = (start + end) / 2;
+
+		// Create a new thread
+
+		int newBottom = (start + end) / 2; // Split the height in 2
 		MeanFilterParallel leftFork = new MeanFilterParallel(img, newImg, dimension, start, right, newBottom, left, radius);
 		MeanFilterParallel rightFork = new MeanFilterParallel(img, newImg, dimension, newBottom, right, end, left, radius);
 		leftFork.fork();
@@ -37,141 +41,113 @@ public class MeanFilterParallel extends RecursiveAction{
 		leftFork.join();
 	}
 
-	public static void main(String[] args){
-
-		String imageName = args[0];
-		String outputName = args[1];
-		int dimension = Integer.parseInt(args[2]);
-
-		if (dimension % 2 == 0){
-			System.out.println("Invalid window width.");
-			System.exit(0);
-		}
-
-		img = readImage(img, imageName);
-		newImg = readImage(newImg, imageName);
-
-
-		int[] borders = getBorders(img, dimension);
-
-		int radius = dimension/2;
-
-		int topBorder = borders[0];
-		int rightBorder = borders[1];
-		int bottomBorder = borders[2];
-		int leftBorder = borders[3];
-
-		MeanFilterParallel meanFilter = new MeanFilterParallel(img, newImg, dimension, topBorder, rightBorder, bottomBorder, leftBorder, radius);
-		ForkJoinPool pool = new ForkJoinPool();
-		final long startTime = System.nanoTime();
-
-		pool.invoke(meanFilter);
-
-		final long endTime = System.nanoTime();
-
-		long time = (endTime - startTime) / 1000000000;
-		System.out.println("Filter time = " + time + "s.");
-
-		System.out.println("Done Processing.");
-		writeImage(newImg, outputName);
-	}
-
 	public BufferedImage filter(){
-		int[][] pixels = new int[dimension*dimension][];
-		int index = 0;
+		int pixelsIW = dimension*dimension; // pixels in window
 
+		// Access each pixel in the image
 		for (int y = start; y < end; y++){
 			for(int x = left; x < right; x++){
 
+				int Atotal = 0, Rtotal = 0, Gtotal = 0, Btotal = 0;
 				int stopJ = y + radius, stopI = x + radius;
 
+				// Get the surrounding pixels of the particular (x,y) pixel, within the winodow
 				for (int j = y - radius; j <= stopJ; j++){
 					for (int i = x - radius; i <= stopI; i++){
-						int p = img.getRGB(i,j);
-						int[] pixelValues = pixelValues(p);
-						pixels[index++] = pixelValues;
+						int p = img.getRGB(i,j);	// Get the pixel value for each
+						// For each pixel, get the ARGB values and add them.
+						Atotal += (p>>24) & 0xff;
+						Rtotal += (p>>16) & 0xff;
+						Gtotal += (p>>8) & 0xff;
+						Btotal += p & 0xff;
 					}
 				}
 				
-				int[] avgPixelValues = avgPixelValues(pixels);
-				int p = setPixelValues(avgPixelValues);
-				newImg.setRGB(x, y, p);
-				index = 0;
+				// obtain the mean of each ARGB values of the pixels
+				int meanA = Atotal/pixelsIW;  
+				int meanR = Rtotal/pixelsIW;  
+				int meanG = Gtotal/pixelsIW;
+				int meanB = Btotal/pixelsIW; 
+
+				// Set the new ARGB values into a new pixel value
+				int p = (meanA << 24) | (meanR << 16) | (meanG << 8) | meanB;
+
+				newImg.setRGB(x, y, p); // set the new pixel value on the writing image.
 			}
 		}
 
 		return newImg;
-	}
+	}		
 
-	public static BufferedImage readImage(BufferedImage img, String imageName){
+	public static void main(String[] args){
 
+		// Store parameters from command line.
+		String imageName = args[0];
+		String outputName = args[1];
+		int dimension = Integer.parseInt(args[2]);
+
+		// Checks if window width is an odd number >= 3
+		// exits otherwise
+		if (dimension % 2 == 0 || dimension < 3){
+			System.out.println("Invalid window width.");
+			System.exit(0);
+		}
+
+		// Create 2 BufferedImage object and read in the input image twice
+		// One will be used for reading, the other for writing.
+		BufferedImage img = null, newImg = null;
+
+		// Read in the immage
 		try{
 
-			img = ImageIO.read(new File("/home/sibusiso/Desktop/CSC2002S/Assignment 1/CSC2002S_Assignment_1/src/" + imageName));
+			img = ImageIO.read(new File("Pictures/" + imageName));
 			int width = img.getWidth();
 			int height = img.getHeight();
 			img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-			img = ImageIO.read(new File("/home/sibusiso/Desktop/CSC2002S/Assignment 1/CSC2002S_Assignment_1/src/" + imageName));
-			System.out.println("Image read.");
-
-			return img;
+			img = ImageIO.read(new File("Pictures/" + imageName));
+			newImg = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+			newImg = ImageIO.read(new File("Pictures/" + imageName));
 		}
 		catch(IOException e){
 			System.out.println("Error reading: " + e);
+			System.exit(0);
 		}
-		return null;
-	}
 
-	public static void writeImage(BufferedImage img, String imageName){
+		System.out.println("Image read.");
+
+
+		int topBorder = dimension/2; //top
+		int rightBorder = img.getWidth() - dimension/2; //right
+		int bottomBorder = img.getHeight() - dimension/2; //bottom
+		int leftBorder = dimension/2; //left
 		
+		int radius = dimension/2; // This is the distance from the middle pixel to the edge of the window
+
+		MeanFilterParallel meanFilter = new MeanFilterParallel(img, newImg, dimension, topBorder, rightBorder, bottomBorder, leftBorder, radius);
+		ForkJoinPool pool = new ForkJoinPool(); // create a new ForkJoinPool
+
+		final long startTime = System.nanoTime(); // start time for filtering
+
+		pool.invoke(meanFilter); // begin the filter process
+
+		final long endTime = System.nanoTime(); // end time for filtering
+
+		System.out.println("Done Processing.");
+
+		double time = (endTime - startTime) / 1000000000.0; // calculate the running time for the filtering and convert to seconds
+		System.out.println("Filter time =");
+		System.out.println("	" + time + "s.");
+		System.out.println("	" + 1000 * time + "ms."); // Print out filtering time in milliseconds.
+
+		// Write the image
 		try{ 
-			ImageIO.write(img, "jpg", new File("/home/sibusiso/Desktop/CSC2002S/Assignment 1/CSC2002S_Assignment_1/src/" + imageName));
+			ImageIO.write(newImg, "jpg", new File("Pictures/" + outputName));
 			System.out.println("Image written");
 		}
 		catch(IOException e){
 			System.out.println("Error writing: " + e);
+			System.exit(0);
 		}
 	}
 
-	public static int[] getBorders(BufferedImage img, int dimension){
-		int[] borders = new int[4];
-		borders[0] = dimension/2; //top
-		borders[1] = img.getWidth() - dimension/2; //right
-		borders[2] = img.getHeight() - dimension/2; //bottom
-		borders[3] = dimension/2; //left
-		return borders;
-	}
-
-	public static int[] pixelValues(int p){
-		int[] values = new int[4];
-
-		values[0] = (p>>24) & 0xff;
-		values[1] = (p>>16) & 0xff;
-		values[2] = (p>>8) & 0xff;
-		values[3] = p & 0xff;
-
-		return values;
-	}
-
-	public static int[] avgPixelValues(int[]... Values){
-		int[] valuesAvg = new int[4]; // this will store all the average ARGB values.
-
-		// sum up each ARGB value from the arrays passed into the function.
-		for (int[] values: Values){
-			for (int i = 0; i < values.length; i++)
-				valuesAvg[i] += values[i];
-		}
-
-		// get averages of each ARGB values.
-		for (int i = 0; i < valuesAvg.length; i++)
-			valuesAvg[i] = valuesAvg[i]/Values.length;
-
-		return valuesAvg;
-	}
-
-	public static int setPixelValues(int[] values){
-		int p = (values[0]<<24) | (values[1]<<16) | (values[2]<<8) | values[3];
-		return p;
-	}
-	
 }

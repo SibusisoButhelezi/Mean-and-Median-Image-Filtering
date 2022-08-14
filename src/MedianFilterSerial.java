@@ -8,139 +8,108 @@ public class MedianFilterSerial{
 
 	public static void main(String[] args){
 
+		// Store parameters from command line.
 		String imageName = args[0];
 		String outputName = args[1];
 		int dimension = Integer.parseInt(args[2]);
 
-		if (dimension % 2 == 0){
+		// Checks if window width is an odd number >= 3
+		// exits otherwise
+		if (dimension % 2 == 0 || dimension < 3){
 			System.out.println("Invalid window width.");
 			System.exit(0);
 		}
 
+		// Create 2 BufferedImage object and read in the input image twice
+		// One will be used for reading, the other for writing.
 		BufferedImage img = null, newImg = null;
-		img = readImage(img, imageName);
-		newImg = readImage(newImg, imageName);
 
-		int[] borders = getBorders(img, dimension);
-
-		int radius = dimension/2;
-
-		int topBorder = borders[0];
-		int rightBorder = borders[1];
-		int bottomBorder = borders[2];
-		int leftBorder = borders[3];
-
-
-		final long startTime = System.nanoTime();
-
-		newImg = filter(img, newImg, dimension, topBorder, rightBorder, bottomBorder, leftBorder, radius);
-
-		final long endTime = System.nanoTime();
-
-		long time = (endTime - startTime) / 1000000000;
-		System.out.println("Filter time = " + time + "s.");
-
-		System.out.println("Done Processing.");
-		writeImage(newImg, outputName);
-	}
-
-	public static BufferedImage filter(BufferedImage img, BufferedImage newImg, int dimension, int topBorder, int rightBorder, int bottomBorder, int leftBorder, int radius){
-		int[][] pixels = new int[dimension*dimension][];
-		int index = 0;
-
-		for (int y = topBorder; y < bottomBorder; y++){
-			for(int x = leftBorder; x < rightBorder; x++){
-
-				for (int j = y - radius; j <= y + radius; j++){
-					for (int i = x - radius; i <= x + radius; i++){
-						int p = img.getRGB(i,j);
-						int[] pixelValues = pixelValues(p);
-						pixels[index++] = pixelValues;
-					}
-				}
-				
-				int[] medPixelValues = medPixelValues(pixels);
-				int p = setPixelValues(medPixelValues);
-				newImg.setRGB(x, y, p);
-				index = 0;
-			}
-		}
-
-		return newImg;
-	}
-
-	public static BufferedImage readImage(BufferedImage img, String imageName){
-
+		// Read in the immage
 		try{
 
-			img = ImageIO.read(new File("/home/sibusiso/Desktop/CSC2002S/Assignment 1/CSC2002S_Assignment_1/src/" + imageName));
+			img = ImageIO.read(new File("Pictures/" + imageName));
 			int width = img.getWidth();
 			int height = img.getHeight();
 			img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-			img = ImageIO.read(new File("/home/sibusiso/Desktop/CSC2002S/Assignment 1/CSC2002S_Assignment_1/src/" + imageName));
-			System.out.println("Image read.");
-
-			return img;
+			img = ImageIO.read(new File("Pictures/" + imageName));
+			newImg = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+			newImg = ImageIO.read(new File("Pictures/" + imageName));
 		}
 		catch(IOException e){
 			System.out.println("Error reading: " + e);
+			System.exit(0);
 		}
-		return null;
-	}
 
-	public static void writeImage(BufferedImage img, String imageName){
+		System.out.println("Image read.");
+
+
+		int topBorder = dimension/2; //top
+		int rightBorder = img.getWidth() - dimension/2; //right
+		int bottomBorder = img.getHeight() - dimension/2; //bottom
+		int leftBorder = dimension/2; //left
 		
+		int radius = dimension/2; // This is the distance from the middle pixel to the edge of the window
+
+		final long startTime = System.nanoTime(); // start time for filtering 
+
+		newImg = filter(img, newImg, dimension, topBorder, rightBorder, bottomBorder, leftBorder, radius);
+
+		final long endTime = System.nanoTime(); // end time for filtering
+
+		System.out.println("Done Processing.");
+
+		double time = (endTime - startTime) / 1000000000.0; // calculate the running time for the filtering and convert to seconds
+		System.out.println("Filter time =");
+		System.out.println("	" + time + "s.");
+		System.out.println("	" + 1000 * time + "ms."); // Print out filtering time in milliseconds.
+
+		// Write the image
 		try{ 
-			ImageIO.write(img, "jpg", new File("/home/sibusiso/Desktop/CSC2002S/Assignment 1/CSC2002S_Assignment_1/src/" + imageName));
+			ImageIO.write(newImg, "jpg", new File("Pictures/" + outputName));
 			System.out.println("Image written");
 		}
 		catch(IOException e){
 			System.out.println("Error writing: " + e);
+			System.exit(0);
 		}
 	}
 
-	public static int[] getBorders(BufferedImage img, int dimension){
-		int[] borders = new int[4];
-		borders[0] = dimension/2; //top
-		borders[1] = img.getWidth() - dimension/2; //right
-		borders[2] = img.getHeight() - dimension/2; //bottom
-		borders[3] = dimension/2; //left
-		return borders;
-	}
+	public static BufferedImage filter(BufferedImage img, BufferedImage newImg, int dimension, int topBorder, int rightBorder, int bottomBorder, int leftBorder, int radius){
+		int pixelsIW = dimension*dimension;
 
-	public static int[] pixelValues(int p){
-		int[] values = new int[4];
+		for (int y = topBorder; y < bottomBorder; y++){
+			for(int x = leftBorder; x < rightBorder; x++){
 
-		values[0] = (p>>24) & 0xff;
-		values[1] = (p>>16) & 0xff;
-		values[2] = (p>>8) & 0xff;
-		values[3] = p & 0xff;
+				int[] Avalues = new int[pixelsIW];
+				int[] Rvalues = new int[pixelsIW];
+				int[] Gvalues = new int[pixelsIW];
+				int[] Bvalues = new int[pixelsIW];
 
-		return values;
-	}
+				int ind = 0;
 
-	public static int[] medPixelValues(int[]... Values){
-		int[] valuesMed = new int[4];
+				for (int j = y - radius; j <= y + radius; j++){
+					for (int i = x - radius; i <= x + radius; i++){
 
-		int[] Avalues = new int[Values.length];
-		int[] Rvalues = new int[Values.length];
-		int[] Gvalues = new int[Values.length];
-		int[] Bvalues = new int[Values.length];
-		int ind = 0;
+						int p = img.getRGB(i,j);
+						Avalues[ind] = (p>>24) & 0xff;
+						Rvalues[ind] = (p>>16) & 0xff;
+						Gvalues[ind] = (p>>8) & 0xff;
+						Bvalues[ind++] = p & 0xff;
+					}
+				}
+				
+				int medA = getMedian(Avalues);
+				int medR = getMedian(Rvalues);
+				int medG = getMedian(Gvalues);
+				int medB = getMedian(Bvalues);
 
-		for (int[] pixel : Values){
-			Avalues[ind] = pixel[0];
-			Rvalues[ind] = pixel[1];
-			Gvalues[ind] = pixel[2];
-			Bvalues[ind++] = pixel[3];
+				int p = (medA<<24) | (medR<<16) | (medG<<8) | medB;
+
+				newImg.setRGB(x, y, p);
+			}
 		}
-		
-		valuesMed[0] = getMedian(Avalues);
-		valuesMed[1] = getMedian(Rvalues);
-		valuesMed[2] = getMedian(Gvalues);
-		valuesMed[3] = getMedian(Bvalues);	
 
-		return valuesMed;		
+		return newImg;
 	}
 
 	public static int getMedian(int[] array){
@@ -148,10 +117,5 @@ public class MedianFilterSerial{
 		if (array.length % 2 == 1)
 			return array[array.length/2];
 		return (array[array.length/2] + array[(array.length/2) - 1])/2;
-	}
-
-	public static int setPixelValues(int[] values){
-		int p = (values[0]<<24) | (values[1]<<16) | (values[2]<<8) | values[3];
-		return p;
 	}
 }
