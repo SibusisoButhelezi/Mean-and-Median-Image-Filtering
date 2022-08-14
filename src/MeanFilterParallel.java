@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveAction;
-import java.util.concurrent.RecursiveTask;
 
 public class MeanFilterParallel extends RecursiveAction{
 
@@ -100,13 +99,13 @@ public class MeanFilterParallel extends RecursiveAction{
 		// Read in the immage
 		try{
 
-			img = ImageIO.read(new File("Pictures/" + imageName));
+			img = ImageIO.read(new File("bin/Pictures/" + imageName));
 			int width = img.getWidth();
 			int height = img.getHeight();
 			img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-			img = ImageIO.read(new File("Pictures/" + imageName));
+			img = ImageIO.read(new File("bin/Pictures/" + imageName));
 			newImg = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-			newImg = ImageIO.read(new File("Pictures/" + imageName));
+			newImg = ImageIO.read(new File("bin/Pictures/" + imageName));
 		}
 		catch(IOException e){
 			System.out.println("Error reading: " + e);
@@ -141,7 +140,7 @@ public class MeanFilterParallel extends RecursiveAction{
 
 		// Write the image
 		try{ 
-			ImageIO.write(newImg, "jpg", new File("Pictures/" + outputName));
+			ImageIO.write(newImg, "jpg", new File("bin/Pictures/" + outputName));
 			System.out.println("Image written");
 		}
 		catch(IOException e){

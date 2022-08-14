@@ -4,22 +4,20 @@ SRCDIR=src
 BINDIR=bin
 JAVADOC=Javadocs
 
+ARGSALL1 = Image1.jpg Image1OutMeanS.jpg
+ARGSALL2 = Image2.jpg Image2OutMeanS.jpg
+ARGSALL3 = Image3.jpg Image3OutMeanS.jpg
+ARGSALL4 = Image4.jpg Image4OutMeanS.jpg
+
+# ARGSALL = $(ARGSALL1)
+# ARGSALL = $(ARGSALL2)
+ ARGSALL = $(ARGSALL3)
+# ARGSALL = $(ARGSALL4)
+
 # User defined arguements
 # Enter <inputImageName> <outputImageName> <windowWidth>
 # Example: Image1.jpg Image1Out.jpg 3
-ARGS = Image3.jpg Image3OutMedianP.jpg 11
-
-ARGSALL1 = Image1.jpg Image1Out.jpg
-ARGSALL2 = Image2.jpg Image2Out.jpg
-ARGSALL3 = Image3.jpg Image3Out.jpg
-ARGSALL4 = Image4.jpg Image4Out.jpg
-
- ARGSALL = $(ARGSALL1)
-# ARGSALL = $(ARGSALL2)
-# ARGSALL = $(ARGSALL3)
-# ARGSALL = $(ARGSALL4)
-
-
+ARGS = Image1.jpg Image1Out.jpg 3
 
 $(BINDIR)/%.class:$(SRCDIR)/%.java
 	$(JAVAC) -d $(BINDIR)/ -cp $(BINDIR) $<	

@@ -16,7 +16,7 @@ class PictureMatch{
 		int height = FirstImg.getHeight();
 
 		for (int y = 0; y < height; y++){
-			for (int x = 0; x < width; x++){
+			for (int x = 45; x < width; x++){
 
 				int i = FirstImg.getRGB(x, y);
 				int[] pixelValues1 = pixelValues(i);
@@ -39,11 +39,11 @@ class PictureMatch{
 
 		try{
 
-			img = ImageIO.read(new File("/home/sibusiso/Desktop/CSC2002S/Assignment 1/CSC2002S_Assignment_1/src/" + imageName));
+			img = ImageIO.read(new File("Pictures/" + imageName));
 			int width = img.getWidth();
 			int height = img.getHeight();
 			img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-			img = ImageIO.read(new File("/home/sibusiso/Desktop/CSC2002S/Assignment 1/CSC2002S_Assignment_1/src/" + imageName));
+			img = ImageIO.read(new File("Pictures/" + imageName));
 			System.out.println("Image read.");
 
 			return img;

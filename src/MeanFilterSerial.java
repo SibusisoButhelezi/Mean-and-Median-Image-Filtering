@@ -2,10 +2,6 @@ import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class MeanFilterSerial{
 
@@ -30,13 +26,13 @@ public class MeanFilterSerial{
 		// Read in the immage
 		try{
 
-			img = ImageIO.read(new File("Pictures/" + imageName));
+			img = ImageIO.read(new File("bin/Pictures/" + imageName));
 			int width = img.getWidth();
 			int height = img.getHeight();
 			img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-			img = ImageIO.read(new File("Pictures/" + imageName));
+			img = ImageIO.read(new File("bin/Pictures/" + imageName));
 			newImg = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-			newImg = ImageIO.read(new File("Pictures/" + imageName));
+			newImg = ImageIO.read(new File("bin/Pictures/" + imageName));
 		}
 		catch(IOException e){
 			System.out.println("Error reading: " + e);
@@ -68,7 +64,7 @@ public class MeanFilterSerial{
 
 		// Write the image
 		try{ 
-			ImageIO.write(newImg, "jpg", new File("Pictures/" + outputName));
+			ImageIO.write(newImg, "jpg", new File("bin/Pictures/" + outputName));
 			System.out.println("Image written");
 		}
 		catch(IOException e){

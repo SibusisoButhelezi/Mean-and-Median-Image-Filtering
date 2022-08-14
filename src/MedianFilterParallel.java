@@ -5,11 +5,10 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveAction;
-import java.util.concurrent.RecursiveTask;
 
 public class MedianFilterParallel extends RecursiveAction{
 
-	protected int Threshold = 120;
+	protected int Threshold = 60;
 	protected static BufferedImage img = null, newImg = null;
 	protected int dimension, start, right, end, left, radius;
 
@@ -62,13 +61,13 @@ public class MedianFilterParallel extends RecursiveAction{
 		// Read in the immage
 		try{
 
-			img = ImageIO.read(new File("Pictures/" + imageName));
+			img = ImageIO.read(new File("bin/Pictures/" + imageName));
 			int width = img.getWidth();
 			int height = img.getHeight();
 			img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-			img = ImageIO.read(new File("Pictures/" + imageName));
+			img = ImageIO.read(new File("bin/Pictures/" + imageName));
 			newImg = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-			newImg = ImageIO.read(new File("Pictures/" + imageName));
+			newImg = ImageIO.read(new File("bin/Pictures/" + imageName));
 		}
 		catch(IOException e){
 			System.out.println("Error reading: " + e);
@@ -103,7 +102,7 @@ public class MedianFilterParallel extends RecursiveAction{
 
 		// Write the image
 		try{ 
-			ImageIO.write(newImg, "jpg", new File("Pictures/" + outputName));
+			ImageIO.write(newImg, "jpg", new File("bin/Pictures/" + outputName));
 			System.out.println("Image written");
 		}
 		catch(IOException e){
@@ -114,11 +113,11 @@ public class MedianFilterParallel extends RecursiveAction{
 
 
 	public BufferedImage filter(){
-		int pixelsIW = dimension*dimension;
+		int pixelsIW = dimension*dimension; // number of pixels in the window
 
 		for (int y = start; y < end; y++){
 			for(int x = left; x < right; x++){
-
+				// Initialize arrays for storing ARGB values
 				int[] Avalues = new int[pixelsIW];
 				int[] Rvalues = new int[pixelsIW];
 				int[] Gvalues = new int[pixelsIW];
@@ -126,24 +125,25 @@ public class MedianFilterParallel extends RecursiveAction{
 
 				int ind = 0;
 
-				int stopJ = y + radius, stopI = x + radius;
-
-				for (int j = y - radius; j <= stopJ; j++){
-					for (int i = x - radius; i <= stopI; i++){
+				for (int j = y - radius; j <= y + radius; j++){
+					for (int i = x - radius; i <= x + radius; i++){
 
 						int p = img.getRGB(i,j);
+						// Add each of the ARGB values into their respective arrays
 						Avalues[ind] = (p>>24) & 0xff;
 						Rvalues[ind] = (p>>16) & 0xff;
 						Gvalues[ind] = (p>>8) & 0xff;
 						Bvalues[ind++] = p & 0xff;
 					}
 				}
-				
+
+				// Obtain the median of each of the ARGB values stored in their respective arrays
 				int medA = getMedian(Avalues);
 				int medR = getMedian(Rvalues);
 				int medG = getMedian(Gvalues);
 				int medB = getMedian(Bvalues);
 
+				// set the pixel value using the medians of the ARGB values
 				int p = (medA<<24) | (medR<<16) | (medG<<8) | medB;
 
 				newImg.setRGB(x, y, p);
@@ -152,7 +152,9 @@ public class MedianFilterParallel extends RecursiveAction{
 
 		return newImg;
 	}
-
+/*
+	Method which takes in an int array and returns the median value
+*/ 
 	public static int getMedian(int[] array){
 		Arrays.sort(array);
 		if (array.length % 2 == 1)

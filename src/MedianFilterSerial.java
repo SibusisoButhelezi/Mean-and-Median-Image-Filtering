@@ -27,13 +27,13 @@ public class MedianFilterSerial{
 		// Read in the immage
 		try{
 
-			img = ImageIO.read(new File("Pictures/" + imageName));
+			img = ImageIO.read(new File("bin/Pictures/" + imageName));
 			int width = img.getWidth();
 			int height = img.getHeight();
 			img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-			img = ImageIO.read(new File("Pictures/" + imageName));
+			img = ImageIO.read(new File("bin/Pictures/" + imageName));
 			newImg = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-			newImg = ImageIO.read(new File("Pictures/" + imageName));
+			newImg = ImageIO.read(new File("bin/Pictures/" + imageName));
 		}
 		catch(IOException e){
 			System.out.println("Error reading: " + e);
@@ -65,7 +65,7 @@ public class MedianFilterSerial{
 
 		// Write the image
 		try{ 
-			ImageIO.write(newImg, "jpg", new File("Pictures/" + outputName));
+			ImageIO.write(newImg, "jpg", new File("bin/Pictures/" + outputName));
 			System.out.println("Image written");
 		}
 		catch(IOException e){
@@ -75,11 +75,11 @@ public class MedianFilterSerial{
 	}
 
 	public static BufferedImage filter(BufferedImage img, BufferedImage newImg, int dimension, int topBorder, int rightBorder, int bottomBorder, int leftBorder, int radius){
-		int pixelsIW = dimension*dimension;
+		int pixelsIW = dimension*dimension; // number of pixels in the window
 
 		for (int y = topBorder; y < bottomBorder; y++){
 			for(int x = leftBorder; x < rightBorder; x++){
-
+				// Initialize arrays for storing ARGB values
 				int[] Avalues = new int[pixelsIW];
 				int[] Rvalues = new int[pixelsIW];
 				int[] Gvalues = new int[pixelsIW];
@@ -91,6 +91,7 @@ public class MedianFilterSerial{
 					for (int i = x - radius; i <= x + radius; i++){
 
 						int p = img.getRGB(i,j);
+						// Add each of the ARGB values into their respective arrays
 						Avalues[ind] = (p>>24) & 0xff;
 						Rvalues[ind] = (p>>16) & 0xff;
 						Gvalues[ind] = (p>>8) & 0xff;
@@ -98,11 +99,13 @@ public class MedianFilterSerial{
 					}
 				}
 				
+				// Obtain the median of each of the ARGB values stored in their respective arrays
 				int medA = getMedian(Avalues);
 				int medR = getMedian(Rvalues);
 				int medG = getMedian(Gvalues);
 				int medB = getMedian(Bvalues);
 
+				// set the pixel value using the medians of the ARGB values
 				int p = (medA<<24) | (medR<<16) | (medG<<8) | medB;
 
 				newImg.setRGB(x, y, p);
@@ -111,6 +114,10 @@ public class MedianFilterSerial{
 
 		return newImg;
 	}
+
+/*
+	Method which takes in an int array and returns the median value
+*/ 
 
 	public static int getMedian(int[] array){
 		Arrays.sort(array);
