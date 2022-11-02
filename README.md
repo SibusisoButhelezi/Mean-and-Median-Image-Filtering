@@ -1,4 +1,4 @@
-# CSC2002S_Assignment_1
+# Mean and Median Image Filtering
 
 To run an image file, edit the Makefile ARGS variable with the image input name, image output name and window width of your choosing.
 Before you run it, make sure that the image is in the bin/Pictures directory.
